@@ -3,7 +3,6 @@ package com.baigiamasis.ed.geo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -30,6 +28,9 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
+//TODO fix: Location permission window crash (app crashes only first time after permission is granted)
+//TODO fix: after permission is allowed it doesn't crash.
+
     final String TAG = "debug";
     //    private final double latitude = 56.458155, longitude = 16.582279;
     private final double latitude = 55.675165, longitude = 21.175710;
@@ -41,7 +42,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private boolean mRequestingLocationUpdates = true;
     private String mLastUpdateTime;
     private AddressResultReceiver mResultReceiver;
-    private boolean mAddressRequested;
     private DistanceCount distanceCount;
 
     @Override
@@ -52,21 +52,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         MultiDex.install(this);
 
-        //distance
+        // Distance
         mDistance = (TextView) findViewById(R.id.distance);
-        //point
+        // Point location
         mPointLatitudeText = (TextView) findViewById(R.id.pointLatitudeText);
         mPointLongitudeText = (TextView) findViewById(R.id.pointLongtitudeText);
         setPointCoordinates();
-        //location
+        // Location
         mLatitudeText = (TextView) findViewById(R.id.latitudeText);
         mLongitudeText = (TextView) findViewById(R.id.longtitudeText);
-        //time
+        // Time
         mLastUpdateTimeTextView = (TextView) findViewById(R.id.lastUpdatedText);
-        //address
+        // Address
         mAddressText = (TextView) findViewById(R.id.addressText);
 
-        // Create an instance of GoogleAPIClient.
+        // Creates GoogleAPIClient.
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .enableAutoManage(this, this)
@@ -98,8 +98,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onResume() {
         super.onResume();
-//        mResultReceiver = new AddressResultReceiver(new Handler());
-//        mResultReceiver.setReceiver(this);
         if (mGoogleApiClient.isConnected() && !mRequestingLocationUpdates) {
             startLocationUpdates();
             Log.i(TAG, "onResume: connect()");
@@ -108,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     protected void onPause() {
+        Log.i(TAG, "onPause()");
         super.onPause();
         stopLocationUpdates();
     }
@@ -117,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         mGoogleApiClient.disconnect();
     }
 
+    //calls to find current or last known address
     protected void startIntentService() {
         Intent intent = new Intent(this, FetchAddressIntentService.class);
         intent.putExtra(Constants.RECEIVER, mResultReceiver);
@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onConnected(@Nullable Bundle bundle) {
         Log.i(TAG, "onConnected()");
 
+        //change speed for checking location changes
         createLocationRequest(1000, 1000, LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         //Checking Permissions
@@ -150,29 +151,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         } else {
             Log.i(TAG, "mLastLocation is NULL");
         }
-
-        //Address
-        if (mLastLocation != null) {
-            // Determine whether a Geocoder is available.
-            if (!Geocoder.isPresent()) {
-                Toast.makeText(this, R.string.no_geocoder_available,
-                        Toast.LENGTH_LONG).show();
-                return;
-            }
-            if (mAddressRequested) {
-                startIntentService();
-            }
-        }
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 
     protected void createLocationRequest(int interval, int fastestInterval, int priority) {
@@ -192,11 +178,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     protected void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(
-                mGoogleApiClient, this);
+        if (mGoogleApiClient != null) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(
+                    mGoogleApiClient, this);
+        }
     }
 
-    //    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onLocationChanged(Location location) {
         mCurrentLocation = location;
@@ -205,14 +192,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         updateUI(mCurrentLocation);
     }
 
-    //    @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateUI(Location location) {
         //Address and distance
         if (mGoogleApiClient.isConnected() && mLastUpdateTime != null) {
             startIntentService();
             mDistance.setText(distanceCount.returnDistance(location.getLatitude(), location.getLongitude()));
         }
-        mAddressRequested = true;
 
         //updateUI
         Log.i(TAG, "updateUI:" + mLastUpdateTime);
@@ -231,7 +216,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 0);
             }
         }
-
     }
 
     public void displayAddressOutput(String mAddressOutput) {
@@ -246,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     class AddressResultReceiver extends ResultReceiver {
         private String mAddressOutput;
 
-        public AddressResultReceiver(Handler handler) {
+        AddressResultReceiver(Handler handler) {
             super(handler);
         }
 
@@ -258,19 +242,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             mAddressOutput = resultData.getString(Constants.RESULT_DATA_KEY);
             Log.i(TAG, "mAddressOutput:" + mAddressOutput);
 
-            //moves to main UI thread
+            // Moves to main UI thread
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     displayAddressOutput(mAddressOutput);
                 }
             });
-
-            // Show a toast message if an address was found.
-            if (resultCode == Constants.SUCCESS_RESULT) {
-                Toast.makeText(MainActivity.this, R.string.address_found, Toast.LENGTH_LONG).show();
-            }
-
         }
     }
 }
