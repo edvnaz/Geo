@@ -23,16 +23,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
+            android:layout_marginEnd="20dp"
             android:layout_weight="1"
-            android:text="Lat"
+            android:text="@string/lat"
             android:textColor="#fff" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
             android:layout_weight="1"
-            android:text="Lon"
+            android:text="@string/lon"
             android:textColor="#fff" />
     </LinearLayout>
 
@@ -57,6 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
             android:layout_weight="1"
             android:text="@string/longitude"
             android:textColor="#fff" />
@@ -66,24 +69,57 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/firstMeters"
         android:layout_below="@+id/pointCoordinatesLayout"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="78dp"
         android:orientation="horizontal">
 
         <TextView
-            android:textSize="20dp"
+            android:textSize="20sp"
             android:id="@+id/distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="meters"
+            android:text="@string/meters"
             android:textColor="#fff" />
         <TextView
             android:layout_marginLeft="5dp"
-            android:textSize="20dp"
+            android:layout_marginStart="5dp"
+            android:textSize="20sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="m"
+            android:text="@string/km"
+            android:textColor="#fff" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/firstMeters"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal">
+
+        <TextView
+            android:textSize="20sp"
+            android:id="@+id/distance2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/meters"
+            android:textColor="#fff" />
+        <TextView
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
+            android:textSize="20sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/km"
+            android:textColor="#fff" />
+        <TextView
+            android:textSize="20sp"
+            android:id="@+id/time2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time"
             android:textColor="#fff" />
     </LinearLayout>
 
@@ -99,16 +135,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
+            android:layout_marginEnd="20dp"
             android:layout_weight="1"
-            android:text="Lat"
+            android:text="@string/lat"
             android:textColor="#fff" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
             android:layout_weight="1"
-            android:text="Lon"
+            android:text="@string/lon"
             android:textColor="#fff" />
 
     </LinearLayout>
@@ -134,6 +172,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
             android:layout_weight="1"
             android:text="@string/longitude"
             android:textColor="#fff" />
@@ -146,7 +185,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/coordinatesLayout"
         android:layout_centerHorizontal="true"
-        android:text="Time"
+        android:text="@string/time"
         android:textColor="#fff" />
 
     <TextView
@@ -155,8 +194,16 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/lastUpdatedText"
         android:layout_centerHorizontal="true"
-        android:layout_weight="1"
-        android:text="Address"
+        android:text="@string/address"
         android:textColor="#fff" />
+
+    <Button
+        android:text="@string/map"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/buttonMap" />
+
 
 </RelativeLayout>

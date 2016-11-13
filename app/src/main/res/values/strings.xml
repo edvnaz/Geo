@@ -4,7 +4,15 @@
     <string name="latitude">Latitude</string>
     <string name="service_not_available">Service not available</string>
     <string name="invalid_lat_long_used">Invalid latitude, longitude usage</string>
-    <string name="no_address_found">No adress found</string>
-    <string name="address_found">Adress found</string>
+    <string name="no_address_found">No address found</string>
+    <string name="address_found">Address found</string>
     <string name="no_geocoder_available">No geocoder available</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="lat">Lat</string>
+    <string name="lon">Lon</string>
+    <string name="meters">meters</string>
+    <string name="km">km</string>
+    <string name="time">time</string>
+    <string name="address">Address</string>
+    <string name="map">Map</string>
 </resources>

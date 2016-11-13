@@ -33,7 +33,7 @@ class DistanceCount {
     private String countDistance() {
         distance = crntLocation.distanceTo(newLocation);  //in meters
         DecimalFormat f = new DecimalFormat("##.0");
-        return String.valueOf(f.format(distance));
+        return String.valueOf(f.format(distance / 1000));
 //        distance = crntLocation.distanceTo(newLocation) / 1000; // in km
     }
 

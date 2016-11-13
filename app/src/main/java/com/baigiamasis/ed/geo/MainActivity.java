@@ -10,11 +10,14 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.multidex.MultiDex;
+//import android.support.multidex.MultiDex;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -24,6 +27,8 @@ import com.google.android.gms.location.LocationServices;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -32,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 //TODO fix: after permission is allowed it doesn't crash.
 
     final String TAG = "debug";
+    public List mList;
     //    private final double latitude = 56.458155, longitude = 16.582279;
     private final double latitude = 55.675165, longitude = 21.175710;
     public TextView mLatitudeText, mLongitudeText, mLastUpdateTimeTextView, mAddressText,
@@ -43,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private String mLastUpdateTime;
     private AddressResultReceiver mResultReceiver;
     private DistanceCount distanceCount;
+    public Button buttonMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         setContentView(R.layout.activity_main);
         Log.i(TAG, "onCreate");
 
-        MultiDex.install(this);
+//        MultiDex.install(this);
 
         // Distance
         mDistance = (TextView) findViewById(R.id.distance);
@@ -65,6 +72,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         mLastUpdateTimeTextView = (TextView) findViewById(R.id.lastUpdatedText);
         // Address
         mAddressText = (TextView) findViewById(R.id.addressText);
+
+        buttonMapSetUp();
 
         // Creates GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -89,10 +98,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onStart();
     }
 
+    // B U T T O N    S E T    U P
+    public void buttonMapSetUp(){
+        final int MODE_SHOW = 1;
+        buttonMap = (Button) findViewById(R.id.buttonMap);
+        buttonMap.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(), MapsActivity.class);
+                i.putExtra("extra_map_mod", MODE_SHOW);
+                startActivity(i);
+            }
+        });
+
+    }
+
+
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
-        MultiDex.install(this);
+//        MultiDex.install(this);
     }
 
     @Override
@@ -134,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Log.i(TAG, "onConnected()");
 
         //change speed for checking location changes
-        createLocationRequest(1000, 1000, LocationRequest.PRIORITY_HIGH_ACCURACY);
+        createLocationRequest(5000, 10000, LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         //Checking Permissions
         checkPermission();
@@ -189,6 +213,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         mCurrentLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
 
+
+        //
+        // google maps distance matrix api
+        //gauna
+
+        Map map = new Map();
+        String url = map.getMapsApiDirectionsUrl(location, latitude, longitude);
+        Log.w(TAG, url);
+        Map.MapAsyncTask mapAsyncTask = new Map.MapAsyncTask();
+        mapAsyncTask.execute();
+        try {
+            mList = mapAsyncTask.get();
+
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+
         updateUI(mCurrentLocation);
     }
 
@@ -197,6 +238,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (mGoogleApiClient.isConnected() && mLastUpdateTime != null) {
             startIntentService();
             mDistance.setText(distanceCount.returnDistance(location.getLatitude(), location.getLongitude()));
+
+            TextView mDistance2 = (TextView) findViewById(R.id.distance2);
+            TextView mTime2 = (TextView) findViewById(R.id.time2);
+            try{
+                mDistance2.setText(String.valueOf(mList.get(0)));
+                mTime2.setText(String.valueOf(mList.get(1)));
+            }catch ( IndexOutOfBoundsException e) {
+                e.printStackTrace();
+                Toast.makeText(this.getApplicationContext(), "IndexOutOfBoundsException", Toast.LENGTH_LONG).show();
+            }
         }
 
         //updateUI
