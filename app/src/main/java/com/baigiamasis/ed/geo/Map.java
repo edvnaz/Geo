@@ -47,7 +47,7 @@ class Map {
 
             URL url = null;
             try {
-                url = new URL(mUrl);
+                url = new URL(mUrl);git init
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
