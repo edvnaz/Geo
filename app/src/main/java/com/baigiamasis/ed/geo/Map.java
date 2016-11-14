@@ -53,6 +53,7 @@ class Map {
             }
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
+
             /*
             JSONObject jsonResult = null;
             HttpClient httpClient = new DefaultHttpClient();
